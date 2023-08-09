@@ -2,14 +2,6 @@
 An application that allows user to  create, delete, get Feeds and Feed items
 
 
-## required packages
-
-pip3 install redis
-
-pip3 install celery
-
-brew install redis
-
 ## Installation
 
 1. Clone the repository

@@ -4,20 +4,20 @@ An application that allows user to  create, delete, get Feeds and Feed items
 
 ## Installation
 
-1. Clone the repository
+1. Clone the repository---
     git clone  https://github.com/<username>/RssScraper.git
 
-2. Create a virtual environment and activate Installation
+2. Create a virtual environment and activate Installation---
  python3 -m venv venv
     source venv/bin/activate
 
-3. Install the dependencies
+3. Install the dependencies---
     pip install -r requirements.txt
 
-4. Set up the DB
+4. Set up the DB---
     python manage.py migrate
 
-5. Start the server
+5. Start the server---
     python manage.py runserver
 
 

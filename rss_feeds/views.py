@@ -28,7 +28,6 @@ class ListFeeds(APIView):
             new_feed = Feeds.objects.filter(user=request.user).last()
             scrape_site.delay(serializer.validated_data['url'], new_feed.id) 
             ScheduledTaskArgs.objects.create(url=serializer.validated_data['url'], feed_id=new_feed.id)
-            # my_scheduled_task.delay()
             return Response(serializer.data)
         return Response(serializer.error)
 

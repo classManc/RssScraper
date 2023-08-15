@@ -6,7 +6,7 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RssScraper.settings')
 
 # create an instance of the celery class 
-app = Celery('rss_feeds')
+app = Celery('RssScraper')
 
 #load the configurations accociated with the celery app to prefix  them with CELERY
 app.config_from_object('django.conf:settings', namespace='CELERY')

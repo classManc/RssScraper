@@ -5,22 +5,26 @@ from .models import Feeds,FeedItem, ScheduledTaskArgs
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rss_feeds.tasks import scrape_site, my_scheduled_task
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 ### View for Listing and Creating feeds
+
 class ListFeeds(APIView):
-    authentication_classes = [BasicAuthentication,]
     permission_classes= [IsAuthenticated,]
 
     def get(self, request):
         feeds = Feeds.objects.filter(user=request.user)
         serializer = FeedsSerializer(feeds, many=True)
         return Response(serializer.data)
-
-
+    
+    @swagger_auto_schema(
+        request_body=FeedsSerializer,
+        responses={200: FeedsSerializer},
+    )
     def post(self,request):
         serializer = FeedsSerializer(data=request.data)
         if serializer.is_valid():
@@ -33,7 +37,7 @@ class ListFeeds(APIView):
 
 ### View for Retrieving and Deleting feeds  
 class RetrieveFeeds(APIView):
-    authentication_classes = [BasicAuthentication,]
+    # authentication_classes = [BasicAuthentication,]c
     permission_classes= [IsAuthenticated,]
 
     def get_object(self,pk):
@@ -60,7 +64,7 @@ class RetrieveFeeds(APIView):
 
 ##### view for getting feeditem belonging to one feed
 class RetrieveFeedItem(APIView):
-    authentication_classes = [BasicAuthentication,]
+    # authentication_classes = [BasicAuthentication,]
     permission_classes= [IsAuthenticated,]
 
     def get_object(self,pk):
@@ -107,28 +111,17 @@ class RetrieveFeedItem(APIView):
     
 #  View to list all feed items globally
 class GenericFeedItemList(APIView):
-    authentication_classes = [BasicAuthentication,]
+    # authentication_classes = [BasicAuthentication,]
     permission_classes= [IsAuthenticated,]
 
     def get(self, request):
-        items ={}
-        feeds = Feeds.objects.filter(user=request.user)
-        if len(request.query_params) == 0:
-            for feed in feeds:
-                serializer = FeedItemSerializer(feed.feeditem_set.all(), many=True)
-                items[feed.name]= serializer.data
-            return Response(items)
-        
-        elif request.query_params['is_read'] == "True":
-            for feed in feeds:
-                serializer = FeedItemSerializer(feed.feeditem_set.filter(is_read=True), many=True)
-                items[feed.name]= serializer.data
-            return Response(items)
-        else:
-            for feed in feeds:
-                serializer = FeedItemSerializer(feed.feeditem_set.filter(is_read=False), many=True)
-                items[feed.name]= serializer.data
-            return Response(items)
-
-    
+        feed_items = FeedItem.objects.filter(feed__user=request.user)
+        for item in feed_items:
+            if item.is_read == True:
+                pass
+            else:
+                item.is_read = True
+                item.save()
+        serializer = FeedItemSerializer(feed_items, many=True)
+        return Response(serializer.data)
     

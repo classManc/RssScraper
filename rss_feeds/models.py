@@ -40,7 +40,9 @@ class FeedItem(models.Model):
     def __str__(self):
         return self.title
     
+    
 class ScheduledTaskArgs(models.Model):
     url = models.URLField()
     feed_id = models.IntegerField()
+
 

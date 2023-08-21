@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import ListFeeds, RetrieveFeeds, RetrieveFeedItem,GenericFeedItemList
 
+
+
 urlpatterns = [
     path('', ListFeeds.as_view(), name='listfeeds'),
     path('feeditems/', GenericFeedItemList.as_view(), name='genriclistfeeditem'),

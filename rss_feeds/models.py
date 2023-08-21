@@ -18,8 +18,8 @@ class Category(models.Model):
 class Feeds(models.Model):
     name = models.CharField(max_length=250)
     url = models.URLField(max_length=250, blank=False)
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
-    user = models.ManyToManyField(User)
+    categories = models.ManyToManyField(Category)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -44,5 +44,6 @@ class FeedItem(models.Model):
 class ScheduledTaskArgs(models.Model):
     url = models.URLField()
     feed_id = models.IntegerField()
+    feed_user = models.IntegerField()
 
 

@@ -9,9 +9,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class FeedsSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
     class Meta:
         model = Feeds
-        fields = ('name', 'url', 'categories', 'date_created','user')
+        fields = ('name', 'url', 'categories', 'date_created', 'user')
 
 class FeedItemSerializer(serializers.ModelSerializer):
     is_read = serializers.ReadOnlyField()

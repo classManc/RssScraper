@@ -76,12 +76,13 @@ class ListFeeds(APIView):
         serializer = FeedsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['user'] = request.user
-            if Feeds.objects.filter(name=serializer.validated_data['name'], url=serializer.validated_data['url'],user=serializer.validated_data['user']).exists():
+            if Feeds.objects.filter(name=serializer.validated_data['name'], url=serializer.validated_data['url'], user=serializer.validated_data['user']).exists():
                 return Response({'error':'Data already exists for user'})
             serializer.save()
-            new_feed = Feeds.objects.filter(user=request.user).last()
+
+            new_feed = Feeds.objects.filter(user=request.user).last() # get the last feed created by the user
             scrape_site.delay(serializer.validated_data['url'], new_feed.id, request.user.id) 
-            ScheduledTaskArgs.objects.create(url=serializer.validated_data['url'], feed_id=new_feed.id, feed_user=request.user.id)
+            ScheduledTaskArgs.objects.create(url=serializer.validated_data['url'], feed_id=new_feed.id, feed_user=request.user.id)#
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

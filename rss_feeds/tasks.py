@@ -28,4 +28,4 @@ def my_scheduled_task():
            url = task_args.url
            feed_id = task_args.feed_id
            feed_user = task_args.feed_user
-           return scrape_site.delay(url, feed_id, feed_user)
+           scrape_site.delay(url, feed_id, feed_user)

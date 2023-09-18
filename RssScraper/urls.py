@@ -25,7 +25,7 @@ schema_view = get_schema_view(
         title="RssScraper API",
         default_version="v1",
         description="API for creating, getting, updating, deleting feeds and feeditems",
-        contact=openapi.Contact(email="josephajakye924@gmail.com"),
+        contact=openapi.Contact(email="josephajakaye924@gmail.com"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -39,5 +39,5 @@ urlpatterns = [
     ),
     path('admin/', admin.site.urls),
     path('feeds/', include('rss_feeds.urls')),
-    path('users/', include('user.urls'))
+    path('users/', include('users.urls'))
 ]

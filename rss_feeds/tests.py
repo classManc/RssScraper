@@ -19,17 +19,17 @@ class NoteTests(TestCase):
         self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         self.category = Category.objects.create(name="Sport")
-        self.newcat = Category.objects.first()
+        # self.newcat = Category.objects.first()
         self.feed = Feeds.objects.create(
             name="feedburner", url="https://feeds.feedburner.com/tweakers/mixed", 
             user=self.user
         )
-        self.feed.categories.add(self.newcat)
+        self.feed.categories.add(self.category.pk)
 
         self.valid_payload = {
             "name":"life",
             "url": "https://feeds.feedburner.com/tweakers/mixed",
-            "categories": [self.newcat.id]
+            "categories": [self.category.pk]
         }
         self.invalid_payload =  {
             "name": "",

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .serializers import CategorySerializer, FeedsSerializer,FeedItemSerializer
-from .models import Feeds,FeedItem, ScheduledTaskArgs
+from .models import Feeds, FeedItem, ScheduledTaskArgs
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rss_feeds.tasks import scrape_site, my_scheduled_task
@@ -12,12 +12,10 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 
+
 # Create your views here.
 ### View for Listing and Creating feeds
 
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 class ListFeeds(APIView):
@@ -35,7 +33,7 @@ class ListFeeds(APIView):
                 required=False,
             ),
             openapi.Parameter(
-                name='per_page',
+                name='page_size',
                 in_=openapi.IN_QUERY,
                 type=openapi.TYPE_INTEGER,
                 description='Number of items per page',
@@ -54,9 +52,10 @@ class ListFeeds(APIView):
         ordering = request.query_params.get('ordering', 'name')  # Default to ordering by name
         feeds = feeds.order_by(ordering)
         
-        per_page = request.query_params.get('per_page', self.pagination_class.page_size)  # Get the per_page value or use the default
         paginator = self.pagination_class()
-        paginator.page_size = per_page  # Set the page size to the per_page value
+        paginator.page_size = 1
+        page_size = request.query_params.get('page_size', paginator.page_size)  # Get the per_page value or use the default
+        paginator.page_size = page_size  # Set the page size to the per_page value
         paginated_feeds = paginator.paginate_queryset(feeds, request)
         serializer = FeedsSerializer(paginated_feeds, many=True)
 
@@ -82,13 +81,13 @@ class ListFeeds(APIView):
 
             new_feed = Feeds.objects.filter(user=request.user).last() # get the last feed created by the user
             scrape_site.delay(serializer.validated_data['url'], new_feed.id, request.user.id) 
-            ScheduledTaskArgs.objects.create(url=serializer.validated_data['url'], feed_id=new_feed.id, feed_user=request.user.id)#
+            ScheduledTaskArgs.objects.create(url=serializer.validated_data['url'], feed_id=new_feed.id, feed_user=request.user.id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ### View for Retrieving and Deleting feeds  
 class RetrieveFeeds(APIView):
-    permission_classes= [IsAuthenticated,]
+    permission_classes= [IsAuthenticated]
 
     def get_object(self,pk):
         try:
@@ -112,7 +111,7 @@ class RetrieveFeeds(APIView):
     
     
 
-##### view for getting feeditem belonging to one feed
+##### view for getting feeditems belonging to one feed
 class RetrieveFeedItem(APIView):
     permission_classes= [IsAuthenticated,]
     filter_backends = [SearchFilter,OrderingFilter]
@@ -123,6 +122,25 @@ class RetrieveFeedItem(APIView):
             return Feeds.objects.get(pk=pk)
         except Feeds.DoesNotExist:
             return HttpResponse(status=404)
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                name='page',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description='Page number',
+                required=False,
+            ),
+            openapi.Parameter(
+                name='page_size',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description='Number of items per page',
+                required=False,
+            ),
+        ],
+    )
     
     def get(self, request, pk):
         feed = self.get_object(pk=pk)
@@ -140,6 +158,9 @@ class RetrieveFeedItem(APIView):
             ordering = request.query_params.get('ordering', 'title')  # Default to ordering by title
             feed_items = feed_items.order_by(ordering)
             paginator = self.pagination_class()
+            paginator.page_size = 1
+            page_size = request.query_params.get('page_size', paginator.page_size)  # Get the per_page value or use the default
+            paginator.page_size = page_size  # Set the page size to the per_page value
             paginated_feed_items = paginator.paginate_queryset(feed_items, request)
             serializer = FeedItemSerializer(paginated_feed_items, many=True)  # Use paginated_feeds here
             return paginator.get_paginated_response(serializer.data)
@@ -164,7 +185,7 @@ class GenericFeedItemList(APIView):
                 required=False,
             ),
             openapi.Parameter(
-                name='per_page',
+                name='page_size',
                 in_=openapi.IN_QUERY,
                 type=openapi.TYPE_INTEGER,
                 description='Number of items per page',
@@ -188,9 +209,10 @@ class GenericFeedItemList(APIView):
         feed_items = feed_items.order_by(ordering)
 
 
-        per_page = request.query_params.get('per_page', self.pagination_class.page_size)  # Get the per_page value or use the default
         paginator = self.pagination_class()
-        paginator.page_size = per_page  # Set the page size to the per_page value
+        paginator.page_size = 1
+        page_size = request.query_params.get('page_size', paginator.page_size)  # Get the per_page value or use the default
+        paginator.page_size = page_size  # Set the page size to the per_page value
         paginated_feed_items = paginator.paginate_queryset(feed_items, request)
         serializer = FeedItemSerializer(paginated_feed_items, many=True)
 
